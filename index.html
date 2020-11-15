@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <script type="module">
+    import { Octokit } from "https://cdn.skypack.dev/@octokit/core";
+    window.myOctokit = new Octokit({ auth: `2c449d72c0e4ecf8b9ee756c5970b0069d15c15f` });
+
+    myOctokit
+    .request("GET /repos/{owner}/{repo}/branches/{branch}", {
+        owner: "dirkarnez",
+        repo: "gittest",
+        branch: "master"
+    })                
+    .then(response => myOctokit.request('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
+        owner: "dirkarnez",
+        repo: "gittest",
+        tree_sha: response.data.commit.commit.tree.sha,
+        recursive: "true"
+    }))
+    .then(response => {
+      return myOctokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+          owner: "dirkarnez",
+          repo: "gittest",
+          path: "README.md"
+      });
+    })
+    .then(response => {
+        var aa = atob(response.data.content);
+
+        debugger;
+
+        return myOctokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
+          owner: 'dirkarnez',
+          repo: 'gittest',
+          path: 'README.md',
+          message: '- update README.md',
+          content: btoa('hahahah'),
+          sha: response.data.sha
+        })
+    })
+    .then(response => {
+      return myOctokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+          owner: "dirkarnez",
+          repo: "gittest",
+          path: "README.md"
+      });
+    })
+    .then(response => {
+      var aa = atob(response.data.content);
+      debugger;
+    });
+  </script>
+</body>
+</html>
